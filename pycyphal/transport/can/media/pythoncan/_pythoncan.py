@@ -79,6 +79,7 @@ class PythonCANMedia(Media):
         iface_name: str,
         bitrate: typing.Union[int, typing.Tuple[int, int]],
         mtu: typing.Optional[int] = None,
+        brs: typing.Optional[bool] = None,
         *,
         loop: typing.Optional[asyncio.AbstractEventLoop] = None,
     ) -> None:
@@ -146,6 +147,11 @@ class PythonCANMedia(Media):
 
             - If `bitrate` is a single integer: classic CAN is assumed, MTU defaults to 8 bytes.
             - If `bitrate` is two integers: CAN FD is assumed, MTU defaults to 64 bytes.
+        
+        :param brs: Override bitrate switching (BRS) when using CAN FD.
+            CAN FD _can_ be used without bitrate switching, even if a higher data bitrate is configured and available.
+            This can be useful to enable communication on a bus with otherwise failing communication at higher data rates.
+            If not provided, the default is to use bitrate switching in CAN FD mode.
 
         :param loop: Deprecated.
 
@@ -197,6 +203,7 @@ class PythonCANMedia(Media):
         self._is_fd = (self._mtu > min(self.VALID_MTU_SET) or not single_bitrate) and not (
             self._mtu == min(self.VALID_MTU_SET) and bitrate[0] == bitrate[1]
         )
+        self._brs = brs if brs is not None else self._is_fd
 
         self._closed = False
         self._maybe_thread: typing.Optional[threading.Thread] = None
@@ -244,6 +251,13 @@ class PythonCANMedia(Media):
         Introspection helper. The value is True if the underlying interface operates in CAN FD mode.
         """
         return self._is_fd
+
+    @property
+    def brs(self) -> bool:
+        """
+        Introspection helper. The value is True if bitrate switching is enabled.
+        """
+        return self._brs
 
     def start(
         self,
@@ -305,7 +319,7 @@ class PythonCANMedia(Media):
                 is_extended_id=(f.frame.format == FrameFormat.EXTENDED),
                 data=f.frame.data,
                 is_fd=self._is_fd,
-                bitrate_switch=self._is_fd,
+                bitrate_switch=self._brs,
             )
             try:
                 desired_timeout = monotonic_deadline - loop.time()

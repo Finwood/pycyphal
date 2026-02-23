@@ -312,7 +312,7 @@ def _make_can(
             else:
                 from pycyphal.transport.can.media.pythoncan import PythonCANMedia
 
-                media = PythonCANMedia(iface, br_arb if br_arb == br_data else (br_arb, br_data), mtu)
+                media = PythonCANMedia(iface, br_arb if br_arb == br_data else (br_arb, br_data), mtu, brs=not disable_brs)
             yield CANTransport(media, node_id)
 
 

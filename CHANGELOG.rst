@@ -3,10 +3,15 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+- PythonCAN: Add option to disable bit-rate switching (BRS bit) for FD-CAN, as implemented for SocketCAN.
+
 v1.25
 -----
 
-- SocketCAN: Add option to disable bit-rate switching (BRS bit) for FD-CAN with uavcan.udp.disable_brs.  (`#373 <https://github.com/OpenCyphal/pycyphal/pull/373>`_)
+- SocketCAN: Add option to disable bit-rate switching (BRS bit) for FD-CAN with ``uavcan.can.disable_brs``.  (`#373 <https://github.com/OpenCyphal/pycyphal/pull/373>`_)
 
 v1.24
 -----
